@@ -1,0 +1,418 @@
+<html>
+  <head>
+    <title>d3.js: Selections</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <link rel="stylesheet" href="assets/deck.css">
+    <script src="vendor/jquery.min.js" type="text/javascript"></script>
+  </head>
+</html>
+<body>
+  <textarea id="source">class: center, middle
+
+# d3.js: Selections
+---
+
+class:center,middle
+# d3.js & jQuery
+
+---
+
+# d3.js is a little like jQuery
+
+jQuery is a fast, small, and feature-rich JavaScript library. It makes things like HTML document traversal and manipulation, event handling, animation, and Ajax much simpler with an easy-to-use API that works across a multitude of browsers. With a combination of versatility and extensibility, jQuery has changed the way that millions of people write JavaScript.
+
+[http://jquery.com/](http://jquery.com/)
+
+---
+
+# jQuery intro in 2 slides
+
+### DOM Traversal and Manipulation
+
+```javascript
+$( "button.continue" ).html( "Next Step..." )
+```
+
+### Event Handling:
+
+Show the #banner-message element that is hidden with  display:none in its CSS when any button in #button-container is clicked.
+
+```javascript
+var hiddenBox = $( "#banner-message" );
+$( "#button-container button" ).on( "click", function( event ) {
+  hiddenBox.show();
+});
+```
+---
+
+# jQuery intro in 2 slides
+
+### Remote Data with Ajax:
+Call a local script on the server /api/getWeather with the query parameter zipcode=97201 and replace the element #weather-temp's html with the returned text.
+
+```javascript
+$.ajax({
+  url: "/api/getWeather",
+  data: {
+    zipcode: 97201
+  },
+  success: function( data ) {
+    $( "#weather-temp" ).html( "<strong>" + data + "</strong> degrees" );
+  }
+});
+```
+---
+
+# d3.js & jQuery: Selections
+
+Finding elements in the DOM:
+
+Given:
+
+```html
+<section>
+    <div id="vis">MyVis Here!</div>
+    <div id="vis2">MyVis Second Here!</div>
+</section>
+```
+
+### d3:
+
+```javascript
+d3.select("#vis"); // finds the first element
+d3.selectAll("section div"); // finds both divs
+```
+
+### jQuery:
+
+```javascript
+$("#vis");
+$("section div");
+```
+
+---
+
+## Building Selectors, One Slide Crash Course
+
+*by element type:*
+
+```javascript
+d3.select('p');
+```
+
+*by classname:*
+
+```javascript
+d3.select('.classname');
+d3.select('p.classname.anotherclassname');
+```
+
+*by id:*
+
+```javascript
+d3.select('#myId');
+```
+
+*by some random attriubute:*
+
+```javascript
+d3.select("div[name='jones']");
+```
+
+*by parental relationship:*
+
+```javascript
+d3.select('div>p');
+```
+
+For full list: http://www.w3.org/TR/css3-selectors/#selectors
+
+---
+
+# d3.js & jQuery: Styles
+
+Applying css styles to DOM elements:
+
+```html
+<div class="vis">Such Div,  Much Content</div>
+```
+
+### d3:
+
+```javascript
+d3.select("#vis").style("color", "red");
+d3.select("#vis").style({
+    color: "red"
+    font-size: "2em"
+});
+```
+
+
+### jQuery:
+
+```javascript
+$("#vis").css("color", "red");
+```
+
+<table>
+    <tr>
+        <td>Before</td>
+        <td>After</td>
+    </tr>
+    <tr>
+        <td style="padding-right: 10px;">
+            <div class="vis">Such Div, Much Content</div>
+        </td>
+        <td>
+            <div class="vis" style="color:red; font-size: 2em;">Such Div,  Much Content</div>
+        </td>
+    </tr>
+</table>
+---
+
+# d3.js & jQuery: Attributes
+
+Setting attributes on DOM elements:
+
+### d3:
+
+```javascript
+d3.select("#vis").attr("name", "phonenumber");
+```
+
+### jQuery:
+
+```javascript
+$("#vis").attr("name", "phonenumber");
+```
+
+Before:
+```html
+<div class="vis">Such Div, Much Content</div>
+```
+
+After:
+```html
+<div class="vis" name="phonenumber">Such Div, Much Content</div>
+```
+---
+
+# d3.js & jQuery: DOM events
+
+Capturing user events:
+
+### d3:
+
+```javascript
+d3.select("#vis")
+  .on("mouseover", function(d) {
+    // 'this' is the element
+    // 'd' is the datum associated with it if data was bound
+    // to act on this element with d3, we have to reselect it:
+    d3.select(this).classed("selected", true);
+  });
+```
+
+### jQuery:
+```javascript
+$('#vis').mouseover(function(ev) {
+    $(this).attr("class","selected");
+});
+```
+
+Events reference: https://developer.mozilla.org/en-US/docs/Web/Reference/Events
+---
+
+# d3.js and jQuery: Get Data
+
+Both libraries come with helpers for making ajax requests:
+
+### d3:
+
+```javascript
+d3.json("data.json", function(err, data) {});
+```
+
+### jQuery:
+
+```javascript
+$.getJSON("data.json", function(data) {});
+```
+
+Fetching other types of data:
+
+* `d3.json` - request a JSON blob.
+* `d3.html` - request an HTML document fragment.
+* `d3.xml` - request an XML document fragment.
+* `d3.csv` - request a comma-separated values (CSV) file.
+* `d3.tsv` - request a tab-separated values (TSV) file.
+
+---
+
+class:middle,center
+# Back to selections
+
+---
+
+# What's a d3 selection?
+
+A selection is an array of elements pulled from the current document
+
+It's *always* an array that is ONE element long. That element is also an array containing all matching notes.
+The result is always this structure, even if you only use `select` to get one element.
+
+```javascript
+d3.selectAll("div");
+```
+
+`=> [Array[78]]`
+
+Do *not* attempt to use `.length` to get the size of a selection. It will always be 1.
+Use `size` instead:
+
+```javascript
+d3.selectAll("div").size(); // 78
+```
+
+If you tried to select something that doesn't exist, you will *Still* get a selection that will have one element... it will be null. To check if a selection has any actual nodes, use the `empty` function:
+
+```javascript
+d3.selectAll("div").empty(); // false
+d3.selectAll("nonsense").empty(); // true
+```
+---
+
+# Operating on a selection
+
+```javascript
+d3.select("input")
+    .attr("name", "box")
+    .style("font-size", "2em")
+    .property("checked", "true");
+```
+
+Modifying the contents of a selection:
+
+```javascript
+d3.select("div").text("Hello");
+d3.select("div").html("<b>Hello</b>");
+```
+
+If a selection contains many nodes, *all* nodes will be impacted:
+
+```javascript
+d3.selectAll("div").html("<b>Hello</b>"); // Will set all the divs!
+```
+---
+
+# Node attribute vs selection
+
+Going from d3 selection back to a DOM node:
+
+```javascript
+d3.select("div").node(); // will return DOM node
+```
+
+Going from a node to a d3 selection
+```javascript
+var node = document.getElementById("vis");
+d3.select(node); // will return a d3 selection
+```
+---
+
+# Modifying the DOM tree
+
+What if you wanted to add nodes? No problem:
+
+Appending?
+
+```javascript
+var spanSelection = d3.select("div")
+    .append("span")
+    .style("color", "red");
+```
+
+Inserting? (aka, care more about the order)
+
+```javascript
+// will insert a div to the top of the body
+var divSelection = d3.select(document.body)
+    .insert("div", ":first-child");
+```
+
+Removing?
+
+```javascript
+d3.selectAll("div").remove();
+```
+---
+
+# Subselections
+
+When you run a selections search like this:
+
+`d3.select("div");`
+
+The entire document gets searched. This isn't particulary efficient. You may want to restrict your selection to another parent selection, like so:
+
+```javascript
+var phonebook = d3.select("table.phonebook");
+var numbers = phonebook.selectAll("td.number");
+```
+---
+
+# Selection control flow:
+
+For advanced usage, D3 has a few additional operators for custom control flow. If you want to:
+
+### 1. Do something to *each* element in the selection:
+
+Use `.each`:
+
+```javascript
+d3.selectAll("div").each(function(d, i) {
+    // In this case "this" is an individual DOM node, NOT a d3 selection.
+    console.log(this, arguments);
+});
+```
+
+---
+
+# Selection control flow:
+
+### 2. You want to do something to the *entire* selection:
+
+Use `.call`:
+
+```javascript
+function makeStylish(selection) {
+    selection.style({
+        "color": "red",
+        "font-size": "2em"
+    });
+}
+d3.selectAll("div").call(makeStylish);
+```
+
+This is really helpful if you're starting to think about ways to refactor your code and extract common functionality.
+---
+
+class:middle,center
+
+# Questions?
+
+---
+
+class:middle,center
+
+# Code Time!
+## Exercise: Selections</textarea>
+  <script src="vendor/remark.min.js" type="text/javascript"></script>
+  <script type="text/javascript">
+    var slideshow = remark.create();
+  </script>
+  <script src="vendor/underscore.js" type="text/javascript"></script>
+  <script src="vendor/d3.js" type="text/javascript"></script>
+  
+</body>
+

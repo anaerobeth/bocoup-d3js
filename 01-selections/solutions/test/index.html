@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+
+  <title>Visualizing data with d3.js - Selections Tests</title>
+
+  <!-- QUnit styles -->
+  <link rel="stylesheet" href="../vendor/test/qunit.css">
+</head>
+
+<body>
+  <!-- QUnit stucture -->
+  <div class="dataset-test">
+    <h1 id="qunit-header">Challenge Test Suite</h1>
+    <h2 id="qunit-banner"></h2>
+    <h2 id="qunit-userAgent"></h2>
+    <ol id="qunit-tests"></ol>
+  </div>
+
+  <div id="container" style="display:none;">
+    <div id="visuals">
+      <span>CHANGE ME</span>
+
+      <ul>
+        <li>Cats</li>
+        <li>Dogs</li>
+        <li>Mice</li>
+      </ul>
+
+      <input type="text" value="Irene"></input>
+    </div>
+  </div>
+
+  <!-- Testing libs -->
+  <script src="../vendor/test/qunit.js"></script>
+
+  <!-- Application libs -->
+  <script type="text/javascript" src="../vendor/d3.js"></script>
+  <script type="text/javascript" src="../vendor/topojson.js"></script>
+  <script type="text/javascript" src="../vendor/jquery.min.js"></script>
+  <script type="text/javascript" src="../vendor/underscore.js"></script>
+
+  <!-- application code -->
+  <script type="text/javascript" src="../app/app.js"></script>
+  <script src="//localhost:35729/livereload.js"></script>
+
+  <script type="text/javascript">
+
+  module("Selections", {
+    startup: function() {},
+    teardown: function() {}
+  });
+
+  // test 1
+  test('Task 1: body color changed to khaki', function() {
+    expect(1);
+    equal(body.style('background-color'), "rgb(240, 230, 140)", "The background color should be set to Khaki");
+  });
+
+  // test 2
+  test('Task 2: change contents of viewer to FOUND IT!', function() {
+    expect(2);
+    ok(typeof viewer !== "undefined", "The variable 'viewer' should be defined");
+    equal(viewer.select("span").text(), "FOUND IT!", "The contents of #visuals is set to 'FOUND IT!'");
+  });
+
+  // test 3
+  test('Task 3: create three divs with class name item', function() {
+    expect(1);
+    var divs = d3.selectAll(".item");
+    ok(divs.size() === 3, "There should be 3 divs with the class name item.");
+  });
+
+  // test 4
+  test('Task 4: change the content of item divs to <b>ITEM DIV</b>', function() {
+    expect(5);
+    ok(typeof item_divs !== "undefined", "The variable 'item_divs' should be defined");
+    ok(item_divs.size() === 3, "There should be 3 item_divs with the class name item.");
+    ok(d3.select(item_divs[0][0]).html(), "<b>ITEM DIV</b>", "The contents of the first item div should be <b>ITEM DIV</b>");
+    ok(d3.select(item_divs[0][1]).html(), "<b>ITEM DIV</b>", "The contents of the second item div should be <b>ITEM DIV</b>");
+    ok(d3.select(item_divs[0][2]).html(), "<b>ITEM DIV</b>", "The contents of the third item div should be <b>ITEM DIV</b>");
+  });
+
+  // test 5:
+  test('Task 5: Find all lis and set their name attribute to animal', function() {
+    expect(2);
+    ok(typeof animal_lis !== "undefined", "The variable 'animal_lis' should be defined");
+    equal(animal_lis.attr('name'), "animal", "The name attribute should be set to 'animal'");
+  });
+
+  // test 6:
+  test('Task 6: Find the input and change its value', function() {
+    expect(2);
+    ok(typeof input !== "undefined", "The variable 'input' should be defined");
+    ok(input.property('value') !== "Irene", "The value of the input should be something other than 'Irene'");
+  });
+
+  </script>
+</body>
+</html>

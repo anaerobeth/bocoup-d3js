@@ -1,0 +1,560 @@
+<html>
+  <head>
+    <title>d3.js: Data Binding</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <link rel="stylesheet" href="assets/deck.css">
+    <script src="vendor/jquery.min.js" type="text/javascript"></script>
+  </head>
+</html>
+<body>
+  <textarea id="source">class: center, middle
+
+# d3.js: Data Binding
+
+---
+
+class:center,middle
+## What does it mean to Join/Bind data?
+
+---
+
+# Data joins
+
+The act of creating a mapping between data points and the objects representing them.
+
+For example, take the array:
+
+`[1,2,3]`
+
+If I wanted to represent each number as a symbol, then it would look like so:
+
+`[1,2,3]` -> &diams; &diams; &diams;
+
+Adding a number to that array, should also increase the number of symbols:
+
+`[1,2,3,4]` -> &diams; &diams; &diams; &diams;
+
+Removing a number, should remove its symbol:
+
+`[1,2]` -> &diams; &diams;
+
+---
+
+# Data Joins
+
+In practice, we would probably want to represent each data point in a way that takes the actual value into account. For example, if we want to have a `div` for each item in our array, the mapping might look like so:
+
+`[1,2,3]`
+
+```html
+<div>1</div>
+<div>2</div>
+<div>3</div>
+```
+
+Now adding an element should add a div in the right place: `[1,2,2.5,3]`
+
+```html
+<div>1</div>
+<div>2</div>
+<div>2.5</div>
+<div>3</div>
+```
+
+Same with removing: `[1,3]`
+
+```html
+<div>1</div>
+<div>3</div>
+```
+
+---
+
+# Data Joins
+
+Let's talk about some terminology:
+
+* entering - data points that are **new**
+* updating - data points that **already existed** based on our key function
+* exiting - data points that **no longer exist**
+
+entering in <span style="color:green">green</span>,
+updating in <span style="color:grey">grey</span>,
+exiting in <span style="color:red">red</span>
+
+draw: `[1,2,3,4]`
+
+<span style="color:green">1</span>
+<span style="color:green">2</span>
+<span style="color:green">3</span>
+<span style="color:green">4</span>
+
+draw: `[1,2,3,4,5,6]`
+
+<span style="color:grey">1</span>
+<span style="color:grey">2</span>
+<span style="color:grey">3</span>
+<span style="color:grey">4</span>
+<span style="color:green">5</span>
+<span style="color:green">6</span>
+
+draw: `[4,5,6,7]`
+
+<span style="color:red">1</span>
+<span style="color:red">2</span>
+<span style="color:red">3</span>
+<span style="color:grey">4</span>
+<span style="color:grey">5</span>
+<span style="color:grey">6</span>
+<span style="color:green">7</span>
+
+---
+
+class:center, middle
+
+# Data Joins
+
+How would we implement a join?
+
+---
+
+# Data Joins
+
+```javascript
+function arrayJoiner() {
+    var j = {}, data = [];
+
+    j.join = function(newdata) {};
+
+    return j;
+}
+```
+
+---
+
+# Data Joins
+
+```javascript
+function arrayJoiner() {
+    var j = {}, data = [];
+
+    j.join = function(newdata) {
+
+        // what in our new set of data did not exist in
+        // our current set of data?
+        var enter = newdata.filter(function(n) {
+            return data.indexOf(n) === -1;
+        });
+
+        // overwrite our current data
+        data = newdata;
+
+        // return the results of the filter
+        return {
+            enter: enter
+        };
+    };
+
+    return j;
+}
+```
+
+---
+
+# Data Joins
+
+```javascript
+function arrayJoiner() {
+    var j = {}, data = [];
+
+    j.join = function(newdata) {
+        var enter = newdata.filter(function(n) {
+            return data.indexOf(n) === -1;
+        });
+        var exists = newdata.filter(function(n) {
+            return data.indexOf(n) !== -1;
+        });
+        var exit = data.filter(function(n) {
+            return newdata.indexOf(n) === -1;
+        });
+        data = newdata;
+        return {
+            enter: enter,
+            exists: exists,
+            exit: exit
+        };
+    };
+
+    return j;
+}
+```
+
+---
+
+# Data Joins
+
+Results:
+
+http://www.macwright.org/mistakes/#5010465
+
+```javascript
+// first: construct a join
+var myjoin = arrayJoiner();
+var j = myjoin.join(['cats']);
+j.enter; // ['cats']
+j.exists; // []
+j.exit;  // []
+
+
+// new let's add dogs and kittens
+var k = myjoin.join(['cats', 'dogs', 'kittens']);
+k.enter;  // ['dogs', 'kittens']
+k.exists; // ['cats']
+k.exit;   // []
+
+// new let's add a giraffe and remove the rest
+var k = myjoin.join(['giraffe']);
+k.enter;  // ['giraffe']
+k.exists; // []
+k.exit;   // ['cats', 'dogs', 'kittens']
+```
+---
+
+class:center,middle
+# Data Joins in d3
+
+Thankfully you don't have to think about how to implement data joining yourself in d3. It's all done for you! Like Magic. Complicated, Dark Magic.
+
+---
+
+# Data Joins in d3
+
+In order to define what should happen for your different element states, you first have to go through the following standard ritual:
+
+* Designate a selection that you wish to bind to. It can exist *or not*:
+
+```javascript
+d3.selectAll("div")
+```
+
+* Then, bind your data to it and optionally define how exactly we determine when data is unique (by default, it's by position!)
+
+```javascript
+var binding = d3.selectAll("div")
+    .data(data, function(d) {
+        return d;
+    });
+```
+---
+
+# Data Joins in d3
+
+Now you can define your different selections:
+
+### entering selection:
+
+New elements:
+
+```javascript
+var entering = binding.enter();
+```
+---
+
+# Data Joins in d3
+
+### exiting selection:
+
+Elements for which the data was removed.
+
+```javascript
+var exiting = binding.exit();
+```
+---
+
+# Data Joins in d3
+
+### updating selection:
+
+Elements for which the data previously existed (but may need updating)
+
+```javascript
+var updating = binding;
+```
+---
+
+# Example
+
+![circles along an x axis](assets/circles.example.png)
+
+---
+
+# Example
+
+First, let's establish our chart dimensions:
+
+```javascript
+// define some default dimensions
+var width = 500,
+  height = 100,
+  r = 5;
+```
+
+And the actual selection from which we are going to make this chart:
+
+```javascript
+// define our general chart container
+var chart = d3.select("#vis")
+  .append("svg")
+  .attr("width", width)
+  .attr("height", height);
+```
+
+---
+
+# Example
+
+Then, define the scale we are going to use to position our circles along the x axis:
+
+```javascript
+// define a scale based on which we will position our circles
+var xScale = d3.scale.linear()
+  .range([5, width-r])
+  .domain([1,51]);
+```
+
+Important things to note:
+
+* We are positioning elements along the entire width, but are taking out a radius' worth of space on each end (so that our circles don't get cropped.)
+
+* Our domain is actually dictated by our data, it specifies the "edges" of our data.
+
+---
+
+# Example
+
+Now, let's define the actual container for our circles and a `draw` method that is going to take in our data:
+
+```javascript
+// define the container for our circles
+var circles = chart.append("g")
+  .classed("circles", true);
+
+function draw(data) {
+  // implement this...
+}
+
+// draw two separate sets of data
+draw([1,3,5,10,11,12,50]);
+draw([1,2,5,11,12,51]);
+```
+
+---
+
+# Example
+
+Now, inside our draw method, the first thing we want to do is establish our data binding:
+
+```javascript
+function draw(data) {
+
+  // define the data binding from which we will make our join selections
+  // we are going to be adding circle elements:
+  var binding = circles.selectAll("circle")
+    // we are going to use the actual value of each datum as the join key.
+    .data(data, function(d) {
+      return d;
+    });
+
+  // ...
+}
+```
+
+---
+
+# Example
+
+Now, define our join selections:
+
+```javascript
+function draw(data) {
+  var binding = circles.selectAll("circle")
+    .data(data, function(d) {
+      return d;
+    });
+  var existing = binding;
+  var entering = binding.enter();
+  var exiting = binding.exit();
+}
+```
+
+---
+
+# Example
+
+Lastly, define behavior for each selection:
+
+```javascript
+function draw(data) {
+  var binding = circles.selectAll("circle")
+    .data(data, function(d) {
+      return d;
+    });
+  var existing = binding;
+  var entering = binding.enter();
+  var exiting = binding.exit();
+
+  // Update any existing elements
+  existing.style("fill", "lightgreen");
+
+  // render new elements
+  entering.append("circle")
+      .classed("circle", true)
+      .style("fill", "green")
+      .attr("r", r)
+      .attr("cy", height/2)
+      .attr("cx", function(d) {
+        return xScale(d);
+      });
+
+  // grey out exiting elements
+  exiting.style("fill", "lightgrey");
+}
+```
+
+---
+
+# Example
+
+You can see the live example here:
+
+http://jsfiddle.net/GGDce/2/
+
+---
+
+# Update selection caveat
+
+Depending on where we use the update binding, it can actually mean two differen things!
+
+If we apply changes like so:
+
+```
+update...
+enter...
+exit...
+```
+
+Then the update function will only impact the elements that existed BEFORE any new ones are added during enter.
+
+Otherwise, if we apply changes like so:
+
+```
+enter...
+update...
+exit...
+```
+
+The update selection now includes **everything that remained plus new entering elements**.
+
+This caveat isn't documented, so you need to be aware of it!
+
+---
+
+# d3 example reality
+
+Unfortunetly this beautiful separation is not common in d3 examples on the web, for a few reasons:
+
+1. The examples are meant to illustrate how to create some type of visualization, not the best way to engineer it.
+2. Most examples are not meant to work with updating data, only a single rendering.
+
+Let's look at some blocks:
+
+* http://bl.ocks.org/mbostock/5682158
+* http://bl.ocks.org/mbostock/4060954
+* http://bl.ocks.org/mbostock/8027835
+* http://bl.ocks.org/syntagmatic/5047619
+---
+
+# d3 datum method
+
+The `datum` method allows us to bind a single data point to a selection, or it can be used to return the currently bound data to a specific node.
+
+The `datum` method does not compute a join selection! You can't call `enter` or `exit` on it, so if your data updates, you won't see any changes.
+
+```html
+<div id="vis2"></div>
+```
+
+```javascript
+var data = [ 1, 4, 2, 23 ];
+d3.select("#vis2")
+  .selectAll("div")
+  .data(data)
+  .enter().append("div")
+  .text(function(d) {
+     return d;
+   });
+```
+
+Results in:
+
+```html
+<div id="vis2">
+  <div>1</div>
+  <div>4</div>
+  <div>2</div>
+  <div>23</div>
+</div>
+```
+
+See example: http://jsbin.com/ricog/1/edit
+
+---
+
+# d3 datum method
+
+But:
+
+```html
+<div id="vis"></div>
+```
+
+```javascript
+var data = [ 1, 4, 2, 23 ];
+
+d3.select("#vis")
+  .datum(data)
+  .append("div")
+.text(function(d) {
+  return d.join(" * ");
+});
+```
+
+Results in:
+c
+```html
+<div id="vis">
+  <div>1 * 4 * 2 * 23</div>
+</div>
+```
+
+---
+
+class:middle,center
+
+# Questions?
+
+---
+
+class:middle,center
+# Code Time!
+## Exercise: Data Binding
+</textarea>
+  <script src="vendor/remark.min.js" type="text/javascript"></script>
+  <script type="text/javascript">
+    var slideshow = remark.create();
+  </script>
+  <script src="vendor/underscore.js" type="text/javascript"></script>
+  <script src="vendor/d3.js" type="text/javascript"></script>
+  
+</body>
+

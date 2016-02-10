@@ -1,0 +1,308 @@
+{
+  "AL": {
+    "name": "Alabama",
+    "land": 131426,
+    "water": 4338,
+    "water_to_land_ratio": 0.03300716753153866
+  },
+  "AK": {
+    "name": "Alaska",
+    "land": 1481346,
+    "water": 236507,
+    "water_to_land_ratio": 0.15965682561670264
+  },
+  "AZ": {
+    "name": "Arizona",
+    "land": 294313,
+    "water": 943,
+    "water_to_land_ratio": 0.0032040718554735945
+  },
+  "AR": {
+    "name": "Arkansas",
+    "land": 134856,
+    "water": 2875,
+    "water_to_land_ratio": 0.0213190366020051
+  },
+  "CA": {
+    "name": "California",
+    "land": 403932,
+    "water": 20036,
+    "water_to_land_ratio": 0.04960240832615391
+  },
+  "CO": {
+    "name": "Colorado",
+    "land": 268628,
+    "water": 974,
+    "water_to_land_ratio": 0.0036258320055988207
+  },
+  "CT": {
+    "name": "Connecticut",
+    "land": 12548,
+    "water": 1810,
+    "water_to_land_ratio": 0.14424609499521837
+  },
+  "DE": {
+    "name": "Delaware",
+    "land": 5061,
+    "water": 1388,
+    "water_to_land_ratio": 0.2742540999802411
+  },
+  "DC": {
+    "name": "District of Columbia",
+    "land": 158,
+    "water": 18,
+    "water_to_land_ratio": 0.11392405063291139
+  },
+  "FL": {
+    "name": "Florida",
+    "land": 139670,
+    "water": 30634,
+    "water_to_land_ratio": 0.2193312808763514
+  },
+  "GA": {
+    "name": "Georgia",
+    "land": 149976,
+    "water": 3934,
+    "water_to_land_ratio": 0.026230863604843443
+  },
+  "HI": {
+    "name": "Hawaii",
+    "land": 16635,
+    "water": 11676,
+    "water_to_land_ratio": 0.7018935978358882
+  },
+  "ID": {
+    "name": "Idaho",
+    "land": 214314,
+    "water": 2132,
+    "water_to_land_ratio": 0.009948020194667638
+  },
+  "IL": {
+    "name": "Illinois",
+    "land": 143962,
+    "water": 6037,
+    "water_to_land_ratio": 0.04193467720648505
+  },
+  "IN": {
+    "name": "Indiana",
+    "land": 92895,
+    "water": 1427,
+    "water_to_land_ratio": 0.015361429571021046
+  },
+  "IA": {
+    "name": "Iowa",
+    "land": 144700,
+    "water": 1041,
+    "water_to_land_ratio": 0.007194194885970975
+  },
+  "KS": {
+    "name": "Kansas",
+    "land": 211900,
+    "water": 1197,
+    "water_to_land_ratio": 0.0056488909863142995
+  },
+  "KY": {
+    "name": "Kentucky",
+    "land": 102895,
+    "water": 1764,
+    "water_to_land_ratio": 0.01714369016959036
+  },
+  "LA": {
+    "name": "Louisiana",
+    "land": 112825,
+    "water": 21440,
+    "water_to_land_ratio": 0.19002880567250166
+  },
+  "ME": {
+    "name": "Maine",
+    "land": 79932,
+    "water": 11715,
+    "water_to_land_ratio": 0.1465620777661012
+  },
+  "MD": {
+    "name": "Maryland",
+    "land": 25315,
+    "water": 6819,
+    "water_to_land_ratio": 0.2693659885443413
+  },
+  "MA": {
+    "name": "Massachusetts",
+    "land": 20306,
+    "water": 7032,
+    "water_to_land_ratio": 0.34630158573820546
+  },
+  "MI": {
+    "name": "Michigan",
+    "land": 147122,
+    "water": 103372,
+    "water_to_land_ratio": 0.7026277511181197
+  },
+  "MN": {
+    "name": "Minnesota",
+    "land": 206189,
+    "water": 18982,
+    "water_to_land_ratio": 0.09206116718156643
+  },
+  "MS": {
+    "name": "Mississippi",
+    "land": 121489,
+    "water": 3945,
+    "water_to_land_ratio": 0.03247207566117097
+  },
+  "MO": {
+    "name": "Missouri",
+    "land": 178414,
+    "water": 2119,
+    "water_to_land_ratio": 0.011876870649164303
+  },
+  "MT": {
+    "name": "Montana",
+    "land": 376978,
+    "water": 3859,
+    "water_to_land_ratio": 0.010236671636010589
+  },
+  "NE": {
+    "name": "Nebraska",
+    "land": 199098,
+    "water": 1246,
+    "water_to_land_ratio": 0.006258224592914042
+  },
+  "NV": {
+    "name": "Nevada",
+    "land": 284448,
+    "water": 1904,
+    "water_to_land_ratio": 0.006693666329170885
+  },
+  "NH": {
+    "name": "New Hampshire",
+    "land": 23227,
+    "water": 989,
+    "water_to_land_ratio": 0.0425797563180781
+  },
+  "NJ": {
+    "name": "New Jersey",
+    "land": 19210,
+    "water": 3377,
+    "water_to_land_ratio": 0.17579385736595524
+  },
+  "NM": {
+    "name": "New Mexico",
+    "land": 314311,
+    "water": 606,
+    "water_to_land_ratio": 0.001928026699670072
+  },
+  "NY": {
+    "name": "New York",
+    "land": 122284,
+    "water": 19016,
+    "water_to_land_ratio": 0.155506852899807
+  },
+  "NC": {
+    "name": "North Carolina",
+    "land": 126161,
+    "water": 13230,
+    "water_to_land_ratio": 0.104866004549742
+  },
+  "ND": {
+    "name": "North Dakota",
+    "land": 178647,
+    "water": 4465,
+    "water_to_land_ratio": 0.024993422783478034
+  },
+  "OH": {
+    "name": "Ohio",
+    "land": 106055,
+    "water": 10041,
+    "water_to_land_ratio": 0.09467729008533309
+  },
+  "OK": {
+    "name": "Oklahoma",
+    "land": 177847,
+    "water": 3188,
+    "water_to_land_ratio": 0.01792552025055244
+  },
+  "OR": {
+    "name": "Oregon",
+    "land": 248631,
+    "water": 6175,
+    "water_to_land_ratio": 0.02483600194665991
+  },
+  "PA": {
+    "name": "Pennsylvania",
+    "land": 116075,
+    "water": 3209,
+    "water_to_land_ratio": 0.027645918587120396
+  },
+  "RI": {
+    "name": "Rhode Island",
+    "land": 2707,
+    "water": 1295,
+    "water_to_land_ratio": 0.4783893609161433
+  },
+  "SC": {
+    "name": "South Carolina",
+    "land": 77982,
+    "water": 4949,
+    "water_to_land_ratio": 0.06346336334025801
+  },
+  "SD": {
+    "name": "South Dakota",
+    "land": 196541,
+    "water": 3191,
+    "water_to_land_ratio": 0.016235798128634737
+  },
+  "TN": {
+    "name": "Tennessee",
+    "land": 106752,
+    "water": 2398,
+    "water_to_land_ratio": 0.0224632793764988
+  },
+  "TX": {
+    "name": "Texas",
+    "land": 678051,
+    "water": 17570,
+    "water_to_land_ratio": 0.025912505106548033
+  },
+  "UT": {
+    "name": "Utah",
+    "land": 212752,
+    "water": 7135,
+    "water_to_land_ratio": 0.033536700007520494
+  },
+  "VT": {
+    "name": "Vermont",
+    "land": 23957,
+    "water": 945,
+    "water_to_land_ratio": 0.039445673498351215
+  },
+  "VA": {
+    "name": "Virginia",
+    "land": 102548,
+    "water": 8236,
+    "water_to_land_ratio": 0.08031360923665015
+  },
+  "WA": {
+    "name": "Washington",
+    "land": 172348,
+    "water": 12318,
+    "water_to_land_ratio": 0.07147167359064219
+  },
+  "WV": {
+    "name": "West Virginia",
+    "land": 62362,
+    "water": 394,
+    "water_to_land_ratio": 0.006317950033674353
+  },
+  "WI": {
+    "name": "Wisconsin",
+    "land": 140662,
+    "water": 28977,
+    "water_to_land_ratio": 0.2060044646030911
+  },
+  "WY": {
+    "name": "Wyoming",
+    "land": 251488,
+    "water": 1847,
+    "water_to_land_ratio": 0.007344286804937015
+  }
+}

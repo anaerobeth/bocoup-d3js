@@ -1,0 +1,271 @@
+<html>
+  <head>
+    <title>d3.js: Layouts and Generators</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <link rel="stylesheet" href="assets/deck.css">
+    <script src="vendor/jquery.min.js" type="text/javascript"></script>
+  </head>
+</html>
+<body>
+  <textarea id="source">class:middle,center
+
+# d3.js: Layouts and Generators
+
+---
+
+class:middle,center
+
+# Generators
+
+---
+
+# What is a generator?
+
+A generator is a helper function that can take your data and generate some representation of your geometry, like a path string. While you can probably generate those yourself, that's rather tedious.
+
+---
+
+# Available generators:
+
+* SVG Shapes:
+  * [d3.svg.line](http://bl.ocks.org/mbostock/1642989)
+  * [d3.svg.line.radial](http://bl.ocks.org/mbostock/4583749)
+  * [d3.svg.area](http://bl.ocks.org/mbostock/3883195)
+  * [d3.svg.area.radial](http://bl.ocks.org/mbostock/3048740)
+  * [d3.svg.arc](http://bl.ocks.org/mbostock/1096355)
+  * [d3.svg.symbol](http://bl.ocks.org/mbostock/3244058)
+  * [d3.svg.chord](http://bl.ocks.org/mbostock/4062006)
+  * [d3.svg.diagonal](http://bl.ocks.org/mbostock/4063570)
+  * [d3.svg.diagonal.radial](http://bl.ocks.org/mbostock/4339607)
+
+* Axis Generators
+  * d3.svg.axis - we already saw that
+
+* Geo generators:
+  * [d3.geo.path](http://bl.ocks.org/mbostock/2869871)
+  * [d3.geo.graticule](http://bl.ocks.org/mbostock/3710566)
+  * [d3.geo.circle](http://bl.ocks.org/mbostock/5628479)
+
+---
+
+# SVG generators
+
+All of the SVG shape generators are what you would use to set your `path` "d" attribute! For example:
+
+```javascript
+var diagonal = d3.svg.diagonal()
+    .projection(function(d) { return [d.y, d.x]; });
+var link = svg.selectAll(".link")
+    .data(links)
+  .enter().append("path")
+    .attr("class", "link")
+    .attr("d", diagonal);
+```
+
+---
+
+# Axis generator
+
+The axis generator is the only one that actually operates on SVG elements. It creates the axis lines, ticks and labels for us (which makes it hard to use it in Canvas!)
+
+# Geo generators
+
+Only they `path` generator would be used in our "d" attribute value.
+
+Both the `circle` and `graticule` generators only generate features (aka, data elements) that we then have to put through our geo path generator to render.
+
+---
+
+class:middle,center
+
+# Layouts
+
+---
+
+# What is a Layout?
+
+A layout is a helper function that can take your data and figure out the ways you should position it according to some layout algorithm.
+
+The following layouts are available to you:
+
+* d3.layout.heirarchy (not a direct layout, see more [here](https://github.com/mbostock/d3/wiki/Hierarchy-Layout))
+  * [d3.layout.cluster](http://bl.ocks.org/mbostock/4063570)
+  * [d3.layout.treemap](http://bl.ocks.org/mbostock/972398)
+  * [d3.layout.pack](http://bl.ocks.org/mbostock/4063269)
+  * [d3.layout.tree](http://bl.ocks.org/mbostock/999346)
+  * [d3.layout.partition](http://bl.ocks.org/mbostock/1005873)
+* [d3.layout.pie](http://bl.ocks.org/mbostock/1346395)
+* [d3.layout.histogram](http://bl.ocks.org/mbostock/3048166)
+* [d3.layout.chord](http://bl.ocks.org/mbostock/1046712)
+* [d3.layout.force](http://bl.ocks.org/mbostock/3311124)
+* [d3.layout.bundle](http://bl.ocks.org/emeeks/7380178)
+* [d3.layout.stack](http://bl.ocks.org/mbostock/4060954)
+
+---
+
+# How does a layout work?
+
+* Every layout expects data to be in **a specific format**. Half the battle is figuring out what that format is.
+* A layout will take the data and then **append** positioning information to it, such as x,y,height,width etc. Your job is to render it.
+
+For example, let's take the `d3.layout.cluster` example.
+
+---
+
+```javascript
+{
+  "name": "Animal",
+  "children": [
+    {
+      "name": "Mammal",
+      "children": [
+        {
+          "name": "marsupial",
+          "children": [
+            { "name": "Kangaroo" },
+            { "name": "Wallaby" }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Amphibian",
+      "children": [
+        {
+          "name": "Lissamphibia",
+          "children": [
+            { "name": "Frog" },
+            { "name": "Toad" }
+          ]
+        }
+      ]
+    }
+  ]
+};
+```
+
+---
+
+# Cluster layout example
+
+Generate cluster layout:
+
+```javascript
+var cluster = d3.layout.cluster()
+    .size([height, width - 100]);
+```
+
+Generate a `diagonal` function - there are two, linear and radial. It literally makes the swooshy line.
+
+```javascript
+var diagonal = d3.svg.diagonal()
+    .projection(function(d) { return [d.y, d.x]; });
+```
+
+Generate our nodes and our links:
+
+```javascript
+var nodes = cluster.nodes(root),
+    links = cluster.links(nodes);
+```
+
+---
+
+# Cluster layout example
+
+`nodes` is now a flat array of **all** the nodes and their child relationships including the position in the x,y plane.
+
+```javascript
+[{ children: Array[2], depth: 0, name: "Animal", x: 300, y: 0 }, ...]
+```
+
+`links` is an array containing pairs like so:
+
+```javascript
+[
+  {
+    source: { children: [], depth: 0, name: "Animal", x: 300, y: 0 },
+    target: { children: [], depth: 1, name: "Mammal", x: 150, y: 100,
+      parent: Object }
+  }, ...
+]
+```
+
+---
+
+# Cluster layout example
+
+Now we can actually attach them:
+
+```javascript
+var link = svg.selectAll(".link")
+  .data(links)
+  .enter().append("path")
+    .attr("class", "link")
+    .attr("d", diagonal);
+```
+
+```javascript
+var node = svg.selectAll(".node")
+    .data(nodes)
+  .enter().append("g")
+    .attr("class", "node")
+    .attr("transform", function(d) {
+      return "translate(" + d.y + "," + d.x + ")";
+    });
+
+  node.append("circle")
+      .attr("r", 4.5);
+
+  node.append("text")
+    .attr("dx", function(d) { return d.children ? -8 : 8; })
+    .attr("dy", 3)
+    .style("text-anchor", function(d) {
+      return d.children ? "end" : "start";
+    })
+    .text(function(d) { return d.name; });
+```
+
+---
+
+# Cluster layout example
+
+![cluster](assets/cluster.png)
+
+http://jsbin.com/fugih/1/edit
+
+---
+
+# Layout summary
+
+* figure out data format
+* initialize layout
+* pass data through to calculate appropriate positions
+* proceed to render data as you would normally.
+
+Other layout examples:
+
+* treemap: http://bl.ocks.org/mbostock/972398
+* force: http://bl.ocks.org/mbostock/3311124
+
+---
+
+class:middle,center
+
+# Questions?
+
+---
+
+class:middle,center
+# Code Time!
+## Exercise: Make a Treemap
+</textarea>
+  <script src="vendor/remark.min.js" type="text/javascript"></script>
+  <script type="text/javascript">
+    var slideshow = remark.create();
+  </script>
+  <script src="vendor/underscore.js" type="text/javascript"></script>
+  <script src="vendor/d3.js" type="text/javascript"></script>
+  
+</body>
+

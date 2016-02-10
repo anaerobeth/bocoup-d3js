@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+
+  <title>Visualizing data with d3.js - Axes Tests</title>
+
+  <!-- QUnit styles -->
+  <link rel="stylesheet" href="../vendor/test/qunit.css">
+</head>
+
+<body>
+  <!-- QUnit stucture -->
+  <div class="dataset-test">
+    <h1 id="qunit-header">Challenge Test Suite</h1>
+    <h2 id="qunit-banner"></h2>
+    <h2 id="qunit-userAgent"></h2>
+    <ol id="qunit-tests"></ol>
+  </div>
+
+  <div id="container" style="display:none;">
+    <div id="visuals">
+    </div>
+  </div>
+
+  <!-- Testing libs -->
+  <script src="../vendor/test/qunit.js"></script>
+
+  <!-- Application libs -->
+  <script type="text/javascript" src="../vendor/d3.js"></script>
+  <script type="text/javascript" src="../vendor/topojson.js"></script>
+  <script type="text/javascript" src="../vendor/jquery.min.js"></script>
+  <script type="text/javascript" src="../vendor/underscore.js"></script>
+  <script type="text/javascript" src="../vendor/backbone.js"></script>
+
+  <script src="//localhost:35729/livereload.js"></script>
+  <script type="text/javascript" src="../assets/countrydata.js"></script>
+  <script type="text/javascript" src="../app/setup.js"></script>
+  <script type="text/javascript" src="../app/app.js"></script>
+
+  <!-- TESTS -->
+  <script type="text/javascript">
+// test 1
+test("Task 1: Define x & y axes helpers", function() {
+
+    ok(typeof xAxis !== "undefined", "xAxis should be defined");
+    ok(typeof yAxis !== "undefined", "yAxis should be defined");
+    if (xAxis) {
+      ok(xAxis.orient() === "bottom", "xAxis orient should be bottom");
+      ok(xAxis.ticks()[0] === 12, "xAxis ticks first argument should be 12. Is " + xAxis.ticks()[0]);
+      ok(xAxis.ticks()[1](1000000) === d3.format(",d")(1000000), "xAxis tick formating should be: ',d', converting 1000000 to 1,000,000. Is currently: " + xAxis.ticks()[1](1000000));
+    }
+    if (yAxis) {
+      ok(yAxis.orient() === "left", "yAxis orient should be left");
+    }
+
+});
+
+test("Task 2: Set correct scales on x & y axes", function() {
+
+    var x = Math.random() * 10000;
+
+    if (xAxis) {
+      ok(xScale(x) === xAxis.scale()(x), "xAxis scale should be our x scale");
+    } else {
+      ok(false, "xAxis isn't defined");
+    }
+
+    if (yAxis) {
+      ok(yScale(x) === yAxis.scale()(x), "yAxis scale should be our y scale");
+    } else {
+      ok(false, "yAxis isn't defined");
+    }
+
+});
+
+test("Task 3: y axis actually rendered", function() {
+
+    var g = chart.selectAll("g.y.axis");
+    ok(g.size() === 1, "A group with the class names y and axis should exist on the chart.");
+
+});</script>
+</body>
+</html>

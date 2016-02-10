@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+
+  <title>Visualizing data with d3.js - Scales Tests</title>
+
+  <!-- QUnit styles -->
+  <link rel="stylesheet" href="../vendor/test/qunit.css">
+</head>
+
+<body>
+  <!-- QUnit stucture -->
+  <div class="dataset-test">
+    <h1 id="qunit-header">Challenge Test Suite</h1>
+    <h2 id="qunit-banner"></h2>
+    <h2 id="qunit-userAgent"></h2>
+    <ol id="qunit-tests"></ol>
+  </div>
+
+  <div id="container" style="display:none;">
+    <div id="visuals">
+    </div>
+  </div>
+
+  <!-- Testing libs -->
+  <script src="../vendor/test/qunit.js"></script>
+
+  <!-- Application libs -->
+  <script type="text/javascript" src="../vendor/d3.js"></script>
+  <script type="text/javascript" src="../vendor/topojson.js"></script>
+  <script type="text/javascript" src="../vendor/jquery.min.js"></script>
+  <script type="text/javascript" src="../vendor/underscore.js"></script>
+  <script type="text/javascript" src="../vendor/backbone.js"></script>
+
+  <script src="//localhost:35729/livereload.js"></script>
+  <script type="text/javascript" src="../assets/countrydata.js"></script>
+  <script type="text/javascript" src="../app/setup.js"></script>
+  <script type="text/javascript" src="../app/app.js"></script>
+
+
+  <!-- TESTS -->
+  <script type="text/javascript">
+test("Task 1: Find all country regions", function() {
+
+    var expected = ["Latin America & Caribbean", "Europe & Central Asia",
+      "South Asia", "Sub-Saharan Africa", "Middle East & North Africa",
+      "East Asia & Pacific", "North America"];
+
+    var expectedNum = expected.length;
+    if (regions) {
+      ok(regions.length === expectedNum,
+        "There should be " + expectedNum + " regions. There are " +
+        regions.length);
+
+      if (regions.length) {
+        var i, x;
+        for(i = 0; i < regions.length; i++) {
+          x = regions[i];
+          ok(expected.indexOf(x) != -1, x + " should not be in regions.");
+        }
+
+        for(i = 0; i < expected.length; i++) {
+          x = expected[i];
+          ok(regions.indexOf(x) != -1, x + " should be in regions.");
+        }
+      }
+    }
+
+});
+
+test("Task 2: Make a color scale", function() {
+    ok(typeof regionScale !== "undefined", "regionScale exists");
+    if (regionScale) {
+      var domain = _.compact(regionScale.domain());
+      ok(domain.length === regions.length &&
+        _.isEqual(domain, regions),
+          "The domain of the scale should match regions");
+        console.log(regionScale.domain(), regions);
+      ok(_.isEqual(regionScale.range(), ["#1f77b4","#ff7f0e","#2ca02c","#d62728","#9467bd","#8c564b","#e377c2","#7f7f7f","#bcbd22","#17becf"]),
+          "domain should be ['#1f77b4','#ff7f0e','#2ca02c','#d62728','#9467bd','#8c564b','#e377c2','#7f7f7f','#bcbd22','#17becf']");
+    }
+});
+
+test("Task 3: Color rows by color scale", function() {
+
+    var rows = viewer.selectAll("tr.country");
+    if (rows) {
+      var firstRow = d3.select(rows[0][0]);
+      var lastRow = d3.select(rows[0][211]);
+
+      ok(firstRow.style('background-color') === 'rgb(31, 119, 180)',
+        "First row background color should be: rgb(31, 119, 180) but is: " + firstRow.style('background-color'));
+      ok(lastRow.style('background-color') === 'rgb(44, 160, 44)',
+        "First row background color should be: rgb(44, 160, 44) but is: " + lastRow.style('background-color'));
+    }
+
+});  </script>
+</body>
+</html>

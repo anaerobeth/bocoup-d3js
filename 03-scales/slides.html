@@ -1,0 +1,452 @@
+<html>
+  <head>
+    <title>d3.js: Scales</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <link rel="stylesheet" href="assets/deck.css">
+    <script src="vendor/jquery.min.js" type="text/javascript"></script>
+  </head>
+</html>
+<body>
+  <textarea id="source">class: center, middle
+
+# d3.js: Scales
+
+---
+
+class: center, middle
+
+<blockquote>Scales are functions that map from an input domain to an output range.</blockquote>
+
+-- [D3 Documentation](https://github.com/mbostock/d3/wiki/Quantitative-Scales)
+
+---
+
+class: center, middle
+
+### Quantitative Scales
+
+![scales](assets/d3.scales.quantitative.png)
+
+---
+
+class: center, middle
+
+### Qualitative Scales
+
+![scales](assets/d3.scales.qualitative.png)
+
+
+---
+
+# Scales in d3
+
+There are three groups of scales in d3:
+
+### Quantitative Scales
+
+for continuous input domains, such as numbers.
+
+### Ordinal Scales
+
+for discrete input domains, such as names or categories.
+
+### Time Scales
+
+for time domains.
+
+https://github.com/mbostock/d3/wiki/Scales
+---
+
+# Creating a Scale
+
+When you create a new scale, you actually create a *function* that you can use to then convert your data to a certain scale.
+
+For example:
+
+```javascript
+var scale = d3.scale.linear();
+
+scale(100); // 100
+scale(200); // 200
+```
+
+---
+
+# Setting up the scale domain:
+
+The domain is **what we are mapping FROM**.
+
+In order to convert your data using a scale, you need to tell the scale what your data extent looks like.
+
+```
+_ex·tent_ (ikˈstent)
+noun
+
+the area covered by something.
+"an enclosure ten acres in extent"
+synonyms:   area, size, expanse, length; More
+```
+
+For example if your data looks like this:
+
+```javascript
+var data = [1,2,4,5,7,5,2,13,25,65,1,33,22];
+```
+
+Your extent is: `[1, 65]`.
+You don't have to calcualte it by hand... you can just call:
+
+```javascript
+d3.extent(data); // [1, 65]
+```
+
+---
+
+# Setting up the scale domain:
+
+Now that you know your extent you can set the the _domain_ of your scale like so:
+
+```javascript
+var scale = d3.scale.linear()
+    .domain([1,65]);
+
+scale(1); // 0
+scale(65); // 1
+scale(30); // 0.453125
+```
+
+Our default mapping goes to `0-1`.
+
+---
+
+# Setting up the scale domain:
+
+What if your data isn't a beautiful array of numbers? What if it looks like this:
+
+```javascript
+var data = [
+  { name : "Jan", value: 24.3 },
+  { name : "Feb", value: 224.33 },
+  { name : "Dec", value: 13.6 },
+];
+```
+
+You can actually calculate its extent like so:
+
+```javascript
+var extent = d3.extent(data, function(d) {
+  return d.value;
+}); // [13.6, 224.33]
+```
+
+---
+
+# Setting up the scale range:
+
+The range is **what we are mapping TO**:
+
+By default we've been mapping to the range of `[0,1]`.
+Most likely you want to map to something else, for example:
+
+1. Your screen space! (width/height of container, for example.)
+2. A set of colors, either discrete or a range.
+3. A set of strings the somehow represent your data
+
+etc.
+
+Setting up a basic **numeric** range looks like so:
+
+```javascript
+var scale = d3.scale.linear()
+  .range([0,600]);
+
+scale(0); // 0
+scale(0.5); // 300
+scale(1); // 600
+scale(10); 6000. It just keeps going!
+```
+
+---
+
+
+class: middle, center
+
+# Types of Scales
+
+---
+
+# Quantitative Scales
+
+There are a few different kinds of quantitative scales:
+
+* **Linear Scales** - map a continuous input domain to a continuous output range. Useful when making axes or continous color grades.
+* **Power Scales** - The mapping to the output range value y can be expressed as a function of the input domain value `x: y = mx^k + b`, where `k` is the exponent value. Useful when calculating area size.
+* **Logarithmic Scale** - The mapping to the output range value y can be expressed as a function of the input domain value `x: y = m log(x) + b`.
+* **Quantize Scales** - Like a linear scale, but with a discrete rather than continuous range. Data divided into number of outputs in range.
+* **Quantile Scales** - Finite, equal, and evenly-distributed discrete blocks/buckets into which your data values fall.
+* **Threshold Scales** - Allow you to map arbitrary subsets of the continious domain to discrete values in the range.
+
+---
+
+# Linear Scales
+
+![linear scale](assets/d3.linear.scale.png)
+
+Continious input, continous output.
+
+```javascript
+var scale = d3.scale.linear()
+  .domain([0,100])
+  .range([0,10]);
+
+scale(0); // 0
+scale(50); // 5
+scale(75); // 7.5
+```
+
+---
+
+# Linear Scale
+
+You can even use a linear scale for mapping a continious range to a continuous color scale:
+
+```javascript
+var scale = d3.scale.linear()
+  .domain([0,100])
+  .range(["red", "blue"]);
+
+scale(0);   // #FF0000
+scale(50);  // #800080
+scale(100); // #0000FF
+```
+
+<span style="color:#ff0000;">X</span>
+<span style="color:#e6001a;">X</span>
+<span style="color:#cc0033;">X</span>
+<span style="color:#b3004d;">X</span>
+<span style="color:#990066;">X</span>
+<span style="color:#800080;">X</span>
+<span style="color:#660099;">X</span>
+<span style="color:#4c00b3;">X</span>
+<span style="color:#3300cc;">X</span>
+<span style="color:#1a00e6;">X</span>
+<span style="color:#0000ff;">X</span>
+
+---
+
+# Power Scales
+
+![power scale](assets/d3.linear.power.png)
+
+```
+var scale = d3.scale.sqrt()
+  .domain([0,100])
+  .range([0,25]);
+
+scale(0); // 0
+scale(25); // 12.5
+scale(75); // 21.65
+scale(100); // 25
+```
+
+Note `d3.scale.sqrt()` is an alias to `d3.scale.pow().exponent(.5)`. You can use whichever exponent you'd like!
+
+Power scales are very useful when representing data with areas, for example in a bubble chart. If you're trying to calculate a radius, you pretty much always want a sqrt scale.
+
+---
+
+# Logarithmic Scales
+
+![log scale](assets/d3.linear.log.png)
+
+```javascript
+var scale = d3.scale.log()
+  .domain([1,10000])
+  .range([0,25]);
+
+scale(10); //6.25
+scale(100); //12.5
+scale(1000); //18.75
+scale(5000); //23.11
+scale(7500); //24.21
+scale(10000); //25
+```
+
+Log scales are excellent when:
+
+* There is "[skewness](http://www.forbes.com/sites/naomirobbins/2012/01/19/when-should-i-use-logarithmic-scales-in-my-charts-and-graphs/)" in your data - one or two points are much larger than the rest.
+* When you want to show the rate of change.
+
+---
+
+# Quantize Scales
+
+![Quantize scale](assets/d3.scale.quantize.png)
+
+```javascript
+var scale = d3.scale.quantize()
+  .domain([0,100])
+  .range(["red", "blue", "white"]);
+
+scale(0); //"red"
+scale(33); //"red"
+scale(34); //"blue"
+scale(66); //"blue"
+scale(67); //"white"
+```
+
+Quantize scales are very useful when wanting to bucket your values into equal sized stops. Works best if your data is fairly normally distributed. Very useful for making [legends](http://eyeseast.github.io/visible-data/2013/08/27/responsive-legends-with-d3/)
+
+---
+
+# Quantile vs Quantize
+
+```javascript
+var data = [0,10,20,40,50,100,1000];
+var quantizeScale = d3.scale.quantize()
+  .domain(data)
+  .range(["red", "blue", "white"]);
+
+quantizeScale.invertExtent("red");  // [0, 333.333333]
+quantizeScale.invertExtent("blue"); // [333.333333, 666.666666]
+quantizeScale.invertExtent("red");  // [666.666666, 1000]
+```
+
+Quantize scale divides the **total extent** into N buckets based on range length.
+
+```javascript
+var data = [0,10,20,40,50,100,1000];
+var quantileScale = d3.scale.quantile()
+  .domain(data)
+  .range(["red", "blue", "white"]);
+
+quantScale.invertExtent("red");  // [0, 20]
+quantScale.invertExtent("blue"); // [20, 50]
+quantScale.invertExtent("red");  // [50, 1000]
+```
+
+Quantile scale divides **the actual input** values into N buckets based on range length.
+
+---
+
+# Threshold scales
+
+```javascript
+var thresholdScale = d3.scale.threshold()
+  .domain([0.1, 0.2, 0.3])
+  .range(["red", "blue", "white"]);
+
+thresholdScale(-100); // "red"
+thresholdScale.invertExtent("red");   //[undefined, 0.1]
+thresholdScale.invertExtent("blue");  //[0.1, 0.2]
+thresholdScale.invertExtent("white"); //[0.2, 0.3]
+thresholdScale(100); // undefined
+```
+
+```javascript
+var thresholdScale = d3.scale.threshold()
+  .domain([0.1, 0.2])
+  .range(["red", "blue", "white"]);
+
+thresholdScale(-100); // "red"
+thresholdScale.invertExtent("red");   //[undefined, 0.1]
+thresholdScale.invertExtent("blue");  //[0.1, 0.2]
+thresholdScale.invertExtent("white"); //[0.2, undefined]
+thresholdScale(100); // "white"
+```
+
+---
+
+# Ordinal Scales
+
+In ordinal scales our input has **discrete** values, rather than continuous values. The only thing that matters in an ordinal scale is the **order** of our data, NOT the difference between inputs.
+
+* Ordinal Scales
+* Color scales
+
+---
+
+# Ordinal Scales
+
+```javascript
+var scale = d3.scale.ordinal()
+  .domain(["bad", "neutral", "good"])
+  .range([-1,0,1]);
+
+scale("bad");     // -1
+scale("neutral"); // 0
+scale("good");    // 1
+```
+
+---
+
+# rangePoints vs rangeBands
+
+![range points vs range bands](assets/d3ordinalRange.png)
+
+(from: http://www.jeromecukier.net/blog/2011/08/11/d3-scales-and-color/)
+
+```javascript
+var x=d3.scale.ordinal()
+  .domain(["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"]);
+x.rangePoints([0,120]);
+x("Saturday"); // 120
+x.rangeBands([0,120]);
+x("Saturday"); // 102.85714285714286
+x("Saturday")+x.rangeBand(); // 120
+```
+
+---
+
+# Color Scales
+
+D3 comes packed with some excellent color scales.
+
+#### d3.scale.category10()
+
+Constructs a new ordinal scale with a range of ten categorical colors: <br>
+<span style="color:#1f77b4;">X</span> <span style="color:#ff7f0e;">X</span> <span style="color:#2ca02c;">X</span> <span style="color:#d62728;">X</span> <span style="color:#9467bd;">X</span> <span style="color:#8c564b;">X</span> <span style="color:#e377c2;">X</span> <span style="color:#7f7f7f;">X</span> <span style="color:#bcbd22;">X</span> <span style="color:#17becf;
+">X</span>.
+
+#### d3.scale.category20()
+
+Constructs a new ordinal scale with a range of twenty categorical colors: <br> <span style="color:#1f77b4;">X</span> <span style="color:#aec7e8;">X</span> <span style="color:#ff7f0e;">X</span> <span style="color:#ffbb78;">X</span> <span style="color:#2ca02c;">X</span> <span style="color:#98df8a;">X</span> <span style="color:#d62728;">X</span> <span style="color:#ff9896;">X</span> <span style="color:#9467bd;">X</span> <span style="color:#c5b0d5;">X</span> <span style="color:#8c564b;">X</span> <span style="color:#c49c94;">X</span> <span style="color:#e377c2;">X</span> <span style="color:#f7b6d2;">X</span> <span style="color:#7f7f7f;">X</span> <span style="color:#c7c7c7;">X</span> <span style="color:#bcbd22;">X</span> <span style="color:#dbdb8d;">X</span> <span style="color:#17becf;">X</span> <span style="color:#9edae5;">X</span>.
+
+#### d3.scale.category20b()
+
+Constructs a new ordinal scale with a range of twenty categorical colors: <br><span style="color:#393b79">X</span> <span style="color:#5254a3">X</span> <span style="color:#6b6ecf">X</span> <span style="color:#9c9ede">X</span> <span style="color:#637939">X</span> <span style="color:#8ca252">X</span> <span style="color:#b5cf6b">X</span> <span style="color:#cedb9c">X</span> <span style="color:#8c6d31">X</span> <span style="color:#bd9e39">X</span> <span style="color:#e7ba52">X</span> <span style="color:#e7cb94">X</span> <span style="color:#843c39">X</span> <span style="color:#ad494a">X</span> <span style="color:#d6616b">X</span> <span style="color:#e7969c">X</span> <span style="color:#7b4173">X</span> <span style="color:#a55194">X</span> <span style="color:#ce6dbd">X</span> <span style="color:#de9ed6">X</span>.
+
+#### d3.scale.category20c()
+
+Constructs a new ordinal scale with a range of twenty categorical colors: <br><span style="color:#3182bd">X</span> <span style="color:#6baed6">X</span> <span style="color:#9ecae1">X</span> <span style="color:#c6dbef">X</span> <span style="color:#e6550d">X</span> <span style="color:#fd8d3c">X</span> <span style="color:#fdae6b">X</span> <span style="color:#fdd0a2">X</span> <span style="color:#31a354">X</span> <span style="color:#74c476">X</span> <span style="color:#a1d99b">X</span> <span style="color:#c7e9c0">X</span> <span style="color:#756bb1">X</span> <span style="color:#9e9ac8">X</span> <span style="color:#bcbddc">X</span> <span style="color:#dadaeb">X</span> <span style="color:#636363">X</span> <span style="color:#969696">X</span> <span style="color:#bdbdbd">X</span> <span style="color:#d9d9d9">X</span>.
+
+---
+
+# ColorBrewer Scales
+
+Original ColorBrewer tool: http://colorbrewer2.org/
+Every colorbrewer scale rendered: http://bl.ocks.org/mbostock/5577023
+
+![color brewer](assets/colorbrewer.png)
+
+
+---
+
+class:middle,center
+
+# Questions?
+
+---
+
+class:middle,center
+# Code Time!
+## Exercise: Scales</textarea>
+  <script src="vendor/remark.min.js" type="text/javascript"></script>
+  <script type="text/javascript">
+    var slideshow = remark.create();
+  </script>
+  <script src="vendor/underscore.js" type="text/javascript"></script>
+  <script src="vendor/d3.js" type="text/javascript"></script>
+  
+</body>
+

@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+
+  <title>Visualizing data with d3.js - SVG Tests</title>
+
+  <!-- QUnit styles -->
+  <link rel="stylesheet" href="../vendor/test/qunit.css">
+</head>
+
+<body>
+  <!-- QUnit stucture -->
+  <div class="dataset-test">
+    <h1 id="qunit-header">Challenge Test Suite</h1>
+    <h2 id="qunit-banner"></h2>
+    <h2 id="qunit-userAgent"></h2>
+    <ol id="qunit-tests"></ol>
+  </div>
+
+  <div id="container" style="display:none;">
+    <div id="visuals">
+    </div>
+  </div>
+
+  <!-- Testing libs -->
+  <script src="../vendor/test/qunit.js"></script>
+
+  <!-- Application libs -->
+  <script type="text/javascript" src="../vendor/d3.js"></script>
+  <script type="text/javascript" src="../vendor/topojson.js"></script>
+  <script type="text/javascript" src="../vendor/jquery.min.js"></script>
+  <script type="text/javascript" src="../vendor/underscore.js"></script>
+  <script type="text/javascript" src="../vendor/backbone.js"></script>
+
+  <script src="//localhost:35729/livereload.js"></script>
+  <script type="text/javascript" src="../assets/countrydata.js"></script>
+  <script type="text/javascript" src="../app/setup.js"></script>
+  <script type="text/javascript" src="../app/app.js"></script>
+
+
+  <!-- TESTS -->
+  <script type="text/javascript">
+
+test("Task 1: Calculate radius", function() {
+
+    ok(typeof radius !== "undefined", "Radius should be computed. Currenty isn't.");
+    ok(radius < (width / 214), "Radius should be less than " + (width / 214));
+
+});
+
+test("Task 2.*: Circles created", function() {
+
+    var circles = viewer.selectAll("circle.nation");
+    ok(circles.size() === 214, "There should be 214 circles created, one for each nation. There are " + circles.size());
+
+    if (circles.size() === 214) {
+      var firstCircle = d3.select(circles[0][0]);
+      var lastCircle = d3.select(circles[0][213]);
+
+      ok(firstCircle.attr("cx") === String(radius * 2),
+        "First Circle x should be " + (radius * 2) + " is set to: " +
+         firstCircle.attr("cx"));
+
+      ok(firstCircle.style("fill") === "rgb(31, 119, 180)" ||
+        firstCircle.style("fill") === "#1f77b4",
+        "First Circle fill should be #1f77b4 or rgb(31, 119, 180). Is set to: " +
+        firstCircle.style("fill"));
+
+      ok(firstCircle.attr("cy") === String(radius), "First Circle y should be " +
+        (radius * 2) + " is set to: " + firstCircle.attr("cy"));
+
+      ok(lastCircle.attr("cx") === String(radius * 2), "Last Circle x should be " +
+        (radius * 2) + " is set to: " + lastCircle.attr("cx"));
+
+      ok(lastCircle.style("fill") === "#2ca02c" ||
+        lastCircle.style("fill") === "rgb(44, 160, 44)",
+        "Last Circle fill should be #2ca02c or rgb(44, 160, 44). Is set to: " +
+        lastCircle.style("fill"));
+
+      var lastPos = 213 * (radius * 2 + 3) + radius;
+      ok(lastCircle.attr("cy") === String(lastPos), "Last Circle y should be "
+        + (lastPos) + " is set to: " + lastCircle.attr("cy"));
+    }
+
+});</script>
+</body>
+</html>

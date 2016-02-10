@@ -1,0 +1,357 @@
+<html>
+  <head>
+    <title>d3.js: Working with Canvas + d3</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <link rel="stylesheet" href="assets/deck.css">
+    <script src="vendor/jquery.min.js" type="text/javascript"></script>
+  </head>
+</html>
+<body>
+  <textarea id="source">class: center, middle
+
+# d3.js: Working with Canvas + d3
+
+---
+
+# Canvas Basics
+
+```html
+<canvas id="myCanvas" width="578" height="200"></canvas>
+```
+
+```javascript
+var canvas = document.getElementById('myCanvas');
+var context = canvas.getContext('2d');
+
+// do stuff here
+```
+
+---
+
+# Canvas Basics
+
+```html
+<canvas id="myCanvas" width="578" height="200"></canvas>
+```
+
+```javascript
+var canvas = document.getElementById('myCanvas');
+var context = canvas.getContext('2d');
+
+context.beginPath();
+context.moveTo(100, 150);
+context.lineTo(450, 50);
+context.lineWidth = 15;
+context.stroke();
+```
+
+http://jsfiddle.net/iros/34yvb1xs/
+
+---
+
+# Canvas Basics
+
+```javascript
+var canvas = document.getElementById('myCanvas');
+var context = canvas.getContext('2d');
+
+context.beginPath();
+context.rect(188, 50, 200, 100);
+context.fillStyle = 'yellow';
+context.fill();
+context.lineWidth = 7;
+context.strokeStyle = 'black';
+context.stroke();
+```
+
+http://www.html5canvastutorials.com/tutorials/html5-canvas-rectangles/
+
+---
+
+# Canvas Basics
+
+http://www.html5canvastutorials.com/
+
+---
+
+# d3 + canvas
+
+There are three ways to use d3 and canvas together:
+
+1. Using d3 entirely for its functional purpose - to transform data that you can then position onto your canvas as you see fit.
+
+2. Using d3 with some dummy html nodes to capture lifecycle selections and then repainting the canvas when the data changes
+
+3. Using d3 with some dummy html nodes to capture lifecycle selections AND their animations, repaitning the canvas on a loop.
+
+---
+
+## 1. d3 + canvas, no data binding
+
+Some of d3's facilities you can use pretty easily.
+For example, d3 scales just create data transformation functions. How you
+render that data, is completely up to you!
+
+```javascript
+var base = d3.select("#vis");
+var chart = base.append("canvas")
+  .attr("width", 400)
+  .attr("height", 300);
+
+var context = chart.node().getContext("2d");
+var data = [1,2,13,20,23];
+
+var scale = d3.scale.linear()
+  .range([10, 390])
+  .domain([1,23]);
+
+data.forEach(function(d, i) {
+  context.beginPath();
+  context.rect(scale(d), 150, 10, 10);
+  context.fillStyle="red";
+  context.fill();
+  context.closePath();
+});
+```
+
+http://jsfiddle.net/iros/fc0tj3ef/
+
+---
+
+## 2. Data Binding + Canvas
+
+Most of the time you will want to react to your data though. What you can do is:
+
+1. create some dummy elements that will maintain all information
+2. redraw the canvas based on the elements!
+
+```html
+<custom>
+  <custom class="rect" x="10" y="100" size="15" fillStyle="green"></custom>
+  <custom class="rect" x="27.272727272727273" y="100" size="15" fillStyle="green"></custom>
+  <custom class="rect" x="217.27272727272725" y="100" size="5" fillStyle="lightgrey"></custom>
+  <custom class="rect" x="338.1818181818182" y="100" size="15" fillStyle="green"></custom>
+  <custom class="rect" x="390" y="100" size="5" fillStyle="lightgrey"></custom>
+  <custom class="rect" x="230" y="100" size="8" fillStyle="red"></custom>
+  <custom class="rect" x="310" y="100" size="8" fillStyle="red"></custom>
+</custom>
+```
+
+---
+
+## 2. Data Binding + Canvas
+
+Set up our canvas but also a custom new element that the browser will ignore:
+
+```javascript
+var base = d3.select("#vis");
+
+var chart = base.append("canvas")
+  .attr("width", 400)
+  .attr("height", 300);
+var context = chart.node().getContext("2d");
+
+var dataContainer = base.append("custom");
+```
+
+---
+
+## 2. Data Binding + Canvas
+
+Set up a custom draw that just handles all the lifecycle events:
+
+```javascript
+function drawCustom(data) {
+  var scale = d3.scale.linear()
+    .range([10, 390])
+    .domain(d3.extent(data));
+
+  var dataBinding = dataContainer.selectAll("custom.rect")
+    .data(data, function(d) { return d; });
+
+  dataBinding
+    .attr("size", 15)
+    .attr("fillStyle", "green");
+
+  dataBinding.enter()
+      .append("custom")
+      .classed("rect", true)
+      .attr("x", scale)
+      .attr("y", 100)
+      .attr("size", 8)
+      .attr("fillStyle", "red");
+
+  dataBinding.exit()
+    .attr("size", 5)
+    .attr("fillStyle", "lightgrey");
+
+  drawCanvas();
+}
+```
+
+---
+
+## 2. Data Binding + Canvas
+
+Now setup our drawCanvas to just read those elements and draw them based on their
+attributes:
+
+```javascript
+function drawCanvas() {
+
+  // clear canvas
+  context.fillStyle = "#fff";
+  context.rect(0,0,chart.attr("width"),chart.attr("height"));
+  context.fill();
+
+  var elements = dataContainer.selectAll("custom.rect");
+  elements.each(function(d) {
+    var node = d3.select(this);
+
+    context.beginPath();
+    context.fillStyle = node.attr("fillStyle");
+    context.rect(node.attr("x"), node.attr("y"), node.attr("size"), node.attr("size"));
+    context.fill();
+    context.closePath();
+
+  });
+}
+```
+
+http://jsfiddle.net/iros/79pb8us5/
+
+
+---
+
+## 3. Data Binding + Canvas + transitions
+
+Now what about transition animations??
+
+```javascript
+function drawCustom(data) {
+  var scale = d3.scale.linear()
+    .range([10, 390])
+    .domain(d3.extent(data));
+
+  var dataBinding = dataContainer.selectAll("custom.rect")
+    .data(data, function(d) { return d; });
+
+  dataBinding
+    .attr("size", 8)
+    .transition()
+    .duration(1000)
+    .attr("size", 15)
+    .attr("fillStyle", "green");
+
+  // enter is same...
+
+  dataBinding.exit()
+    .attr("size", 8)
+    .transition()
+    .duration(1000)
+    .attr("size", 5)
+    .attr("fillStyle", "lightgrey");
+}
+```
+
+---
+
+## 3. Data Binding + Canvas + transitions
+
+Note we no longer call `drawCanvas()` at the end of our `drawCustom` method! That's
+because if we want to pick up the transitions we basically need to check on those
+nodes every few milliseconds to pick up the transition values **as they happen**.
+
+```javascript
+d3.timer(drawCanvas);
+drawCustom([1,2,13,20,23]);
+drawCustom([1,2,12,16,20]);
+```
+
+Full example: http://jsfiddle.net/iros/8fsspvfh/
+
+---
+
+# Map Example
+
+Create a canvas instead of an SVG element:
+
+```javascript
+var canvas = d3.select('#vis').append('canvas')
+  .attr('width', width)
+  .attr('height', height);
+```
+
+Create a proxy container that will hold our dummy objects
+
+```javascript
+var proxy = d3.select("#vis").append("dummy:states");
+```
+
+Modify our `d3.geo.path` to render to a context:
+
+```javascript
+var path = d3.geo.path()
+  .projection(projection)
+  .context(context);
+```
+
+Setup your context:
+
+```javascript
+var context = canvas.node().getContext("2d");
+context.strokeStyle = '#fff';
+```
+---
+
+# Map Example
+
+
+```javascript
+proxy.selectAll("dummy:state")
+  .data(topojson.feature(us, us.objects.usStates).features)
+  .enter().append("dummy:state")
+  .each(function(d) {
+    context.fillStyle = colorScale(
+      stats[d.properties.STATE_ABBR].water_to_land_ratio
+    );
+    context.beginPath()
+    path(d);
+    context.fill();
+    context.stroke();
+    context.closePath();
+  });
+```
+
+http://jsfiddle.net/iros/r6dk7ews/
+
+Data from here: http://hci.stanford.edu/jheer/files/zoo/ex/maps/choropleth.html
+
+---
+
+# Examples
+
+* [Parallel Coordinates](http://syntagmatic.github.io/parallel-coordinates/)
+* [Sample block](http://bl.ocks.org/mbostock/1276463)
+
+
+---
+
+class:middle,center
+
+# Questions?
+
+---
+
+class:middle,center
+# Code Time!
+## Exercise: Maps with Canvas</textarea>
+  <script src="vendor/remark.min.js" type="text/javascript"></script>
+  <script type="text/javascript">
+    var slideshow = remark.create();
+  </script>
+  <script src="vendor/underscore.js" type="text/javascript"></script>
+  <script src="vendor/d3.js" type="text/javascript"></script>
+  
+</body>
+

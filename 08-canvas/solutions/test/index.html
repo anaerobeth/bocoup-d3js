@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+
+  <title>Visualizing data with d3.js - Canvas Tests</title>
+
+  <!-- QUnit styles -->
+  <link rel="stylesheet" href="../vendor/test/qunit.css">
+</head>
+
+<body>
+  <!-- QUnit stucture -->
+  <div class="dataset-test">
+    <h1 id="qunit-header">Challenge Test Suite</h1>
+    <h2 id="qunit-banner"></h2>
+    <h2 id="qunit-userAgent"></h2>
+    <ol id="qunit-tests"></ol>
+  </div>
+
+  <div id="container" style="display:none;">
+    <div id="visuals">
+    </div>
+  </div>
+
+  <!-- Testing libs -->
+  <script src="../vendor/test/qunit.js"></script>
+
+  <!-- Application libs -->
+  <script type="text/javascript" src="../vendor/d3.js"></script>
+  <script type="text/javascript" src="../vendor/topojson.js"></script>
+  <script type="text/javascript" src="../vendor/jquery.min.js"></script>
+  <script type="text/javascript" src="../vendor/underscore.js"></script>
+  <script type="text/javascript" src="../vendor/backbone.js"></script>
+
+  <script src="//localhost:35729/livereload.js"></script>
+  <script type="text/javascript" src="../assets/countrydata.js"></script>
+  <script type="text/javascript" src="../assets/countrygeo.js"></script>
+  <script type="text/javascript" src="../app/setup.js"></script>
+  <script type="text/javascript" src="../app/helpers.js"></script>
+  <script type="text/javascript" src="../app/app.js"></script>
+
+  <!-- TESTS -->
+  <script type="text/javascript">
+function getPixel(imageData, x, y) {
+  var index = (x + y * imageData.width) * 4;
+  return [imageData.data[index+0],
+          imageData.data[index+1],
+          imageData.data[index+2],
+          imageData.data[index+3]];
+}
+
+var expectedPixels = [
+  [100, 160, [238, 238, 238, 255]],
+  [50, 60, [227, 118, 193, 128]],
+  [170, 60, [214, 39, 40, 255]],
+  [120, 60, [214, 39, 40, 255]],
+  [80, 40, [214, 39, 40, 255]],
+  [80, 190, [238, 238, 238, 255]]
+];
+// test 1
+test("A map is rendered", function() {
+
+    var map = viewer.selectAll("canvas.map").node();
+    var imageData = map.getContext("2d").getImageData(0,0,200,200);
+
+    expectedPixels.forEach(function(pixel) {
+      var val = getPixel(imageData, pixel[0], pixel[1]);
+      ok(_.isEqual(val, pixel[2]), "Pixel " + pixel[0] + "," + pixel[1] +
+        " should be color: " + pixel[2]);
+    });
+
+});
+
+</script>
+</body>
+</html>

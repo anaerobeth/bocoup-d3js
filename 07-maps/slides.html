@@ -1,0 +1,566 @@
+<html>
+  <head>
+    <title>d3.js: Making Maps</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <link rel="stylesheet" href="assets/deck.css">
+    <script src="vendor/jquery.min.js" type="text/javascript"></script>
+  </head>
+</html>
+<body>
+  <textarea id="source">class: center, middle
+
+# d3.js: Making Maps
+---
+
+# What do you need to make a map?
+
+* Geometry to represent the countries
+* A Projection
+* A Path function
+* Data to represent on a map!
+
+---
+
+# Geometry Data
+
+The first challenge of rendering map is **finding the appropriate geometry data**.
+Depending on the country you're looking for data for, you may need to travel far and wide down government websites and deal with strange formats or old incorrect data.
+
+Some valuable resources:
+
+* [Natural Earth Data](http://www.naturalearthdata.com/) - World Data
+* [US Census Bureau](http://www.census.gov/) - US states, counties and census blocks.
+* [geoCommons](http://geocommons.com/) - crowdsourced geo datasets
+
+---
+
+# Natural Earth Data
+
+There are three types of data [Natural Earth](http://www.naturalearthdata.com/) provides us:
+
+* Cultural - Actual country borders and other breakdowns determined by people
+* Physical - Land-determined breakdowns like coastlines, lakes, rivers etc.
+* Raster - Shaded maps portraying the world environment
+
+This data comes at three different granularities:
+
+* Large Scale (1:10m) - super detailed, good for print
+* Medium Scale (1:50m) - Medium detail
+* Small scale (1:110m) - good for small legend-like charts
+
+---
+
+# Natural Earth Data
+
+What's in the data?
+
+Downloading the `110m-cultural` countries data, we get:
+
+```
+ne_110m_admin_0_countries.README.html
+ne_110m_admin_0_countries.VERSION.txt
+ne_110m_admin_0_countries.dbf
+ne_110m_admin_0_countries.prj
+ne_110m_admin_0_countries.shp
+ne_110m_admin_0_countries.shx
+```
+
+What's in the files?
+
+* `shp` file - contains actual geometry
+* `shx` file - index file
+* `prj` file - projection information for the geometry
+* `dbf` file - additional data attributes per geometry
+
+---
+
+# Now what?
+
+Those files are great, but we can't draw them on the web quite yet. d3 works with
+a file spec called [geoJSON](http://geojson.org/).
+
+```json
+{
+  "type": "Feature",
+  "geometry": {
+    "type": "Point",
+    "coordinates": [125.6, 10.1]
+  },
+  "properties": {
+    "name": "Dinagat Islands"
+  }
+}
+```
+
+Part of the challenge with GeoJSON is that it's fairly **big** so we can convert it
+to a more compact format called **topojson**.
+
+---
+
+# topojson
+
+Topojson is an **extension** of GeoJSON. Topojson does two important things:
+
+* Instead of representing geometries explicity, it represents them using line segments called `arcs`. Arcs can be shared between geometries, thus redundancy is eliminated.
+* Instead of using floating point values, it uses integers and a multiplier to get back to the original coordinates.
+* Additionally, instead of storing full arc values, it uses [delta encoding](http://www.dspguide.com/ch27/4.htm) for the coordinates.
+
+---
+
+.smaller[
+```javascript
+{
+  "type": "Topology",
+  "transform": {
+    "scale": [0.0005000500050005, 0.00010001000100010001],
+    "translate": [100, 0]
+  },
+  "objects": {
+    "example": {
+      "type": "GeometryCollection",
+      "geometries": [
+        {
+          "type": "Point",
+          "properties": {
+            "prop0": "value0"
+          },
+          "coordinates": [4000, 5000]
+        },
+        {
+          "type": "LineString",
+          "properties": {
+            "prop0": "value0",
+            "prop1": 0
+          },
+          "arcs": [0]
+        },
+        {
+          "type": "Polygon",
+          "properties": {
+            "prop0": "value0",
+            "prop1": {
+              "this": "that"
+            }
+          },
+          "arcs": [[1]]
+        }
+      ]
+    }
+  },
+  "arcs": [
+    [[4000, 0], [1999, 9999], [2000, -9999], [2000, 9999]],
+    [[0, 0], [0, 9999], [2000, 0], [0, -9999], [-2000, 0]]
+  ]
+}
+```
+]
+
+---
+
+# topojson
+
+There are two things you need to do with topojson, one on the server and one on the client.
+
+### On the server
+
+Convert geoJSON to it so that you can send it "over the wire". This happens using a commandline utility called `topojson`. You can install it:
+
+`npm install -g topojson`
+
+Then convert your geoJSON file like so:
+
+`topojson -o output.json input.json`
+
+More serverside options here: https://github.com/mbostock/topojson/wiki/Command-Line-Reference
+
+---
+
+# topojson
+
+### On the client:
+
+You need to go back from the topojson format to the regular
+geoJSON format. You can do so like so:
+
+`topojson.feature(ourJSON, ourJSON.objects.example)`
+
+More clientside api here: https://github.com/mbostock/topojson/wiki/API-Reference
+---
+
+# Getting to GeoJSON
+
+Back to our natural earth data, to get it into the right form we need to:
+
+* Convert it from shape file to geoJSON
+* Compress it using topojson's commandline tool
+* Get it into the client
+* Decompress it using topojson's client-side JS api.
+
+---
+
+# Converting Shape Files to GeoJSON
+
+The best way to do this is to [install](http://trac.osgeo.org/gdal/wiki/DownloadingGdalBinaries) [GDAL](http://www.gdal.org/)(Geospatial Data Abstraction Library). This will add an executable to your path called `ogr2ogr`.
+
+```
+ogr2ogr \
+  -f GeoJSON \
+  subunits.json \
+  ne_10m_admin_0_map_subunits.shp
+```
+
+This will convert the entire data. You can be more specific about what you include:
+
+```
+ogr2ogr \
+  -f GeoJSON \
+  -where "ADM0_A3 IN ('AUS')" \
+  countries.json \
+  ne_110m_admin_0_countries.shp
+```
+
+---
+
+# Converting files to topojson
+
+To convert a geoJSON file to topojson, you can run:
+
+```
+topojson -o output.json -p countries.json.
+```
+
+---
+
+# Simplifying geometry
+
+http://www.mapshaper.org/ Is the greatest thing since sliced bread.
+
+You can drag in your shapefile before converting it, then simplify it while viewing your changes and THEN export it.
+
+You can even just use mapshapper to convert your data from shape file to topojson directly.
+
+---
+
+# Onto the client!
+
+Now that we have our geometry defined, we are ready to take it to our client.
+
+```javascript
+d3.json("states.json", function(err, geometry) {
+  // make map here
+});
+```
+
+---
+
+# Onto the client!
+
+```javascript
+var width = 960,
+    height = 700;
+
+var svg = d3.select("#map")
+    .attr("width", width)
+    .attr("height", height);
+
+d3.json("states.json", function(err, geometry) {
+
+});
+```
+
+---
+
+# Onto the client!
+
+```javascript
+var width = 960,
+    height = 700;
+
+var svg = d3.select("#map")
+    .attr("width", width)
+    .attr("height", height);
+
+d3.json("states.json", function(err, geometry) {
+
+  var projection = d3.geo.mercator()
+  var path = d3.geo.path().projection(projection);
+
+});
+```
+
+---
+
+# Onto the client!
+
+```javascript
+var width = 960,
+    height = 700;
+
+var svg = d3.select("#map")
+    .attr("width", width)
+    .attr("height", height);
+
+d3.json("states.json", function(err, geometry) {
+
+  var projection = d3.geo.mercator();
+  var path = d3.geo.path().projection(projection);
+
+  svg.append("path")
+    .datum(topojson.feature(geometry, geometry.objects.usStates))
+    .attr("d", path)
+    .classed("states", true);
+});
+```
+
+---
+
+# Onto the client!
+
+We rendered a map, but it's not ideal...
+
+![assets/map_pre_scale.png](assets/map_pre_scale.png)
+
+---
+
+# Onto the client!
+
+```javascript
+var width = 960,
+    height = 700;
+
+var svg = d3.select("#map")
+    .attr("width", width)
+    .attr("height", height);
+
+d3.json("states.json", function(err, geometry) {
+  var projection = d3.geo.mercator()
+    .scale(950)
+    .translate([width * 2.16, height * 1.5]);
+
+  var path = d3.geo.path().projection(projection);
+
+  svg.append("path")
+    .datum(topojson.feature(geometry, geometry.objects.example))
+    .attr("d", path);
+});
+```
+
+---
+
+# Onto the client!
+
+Better:
+
+![assets/map_post_scale.png](assets/map_post_scale.png)
+
+---
+
+# example code:
+
+So far:
+
+http://jsfiddle.net/iros/41ocz7dt/
+
+---
+
+# Individual paths:
+
+But what if we wanted to have a single polygon per state?
+
+```javascript
+var width = 960,
+    height = 700;
+var svg = d3.select("#map")
+    .attr("width", width)
+    .attr("height", height);
+
+d3.json("states.json", function(err, geometry) {
+  if (err) { console.error(err); }
+  var projection = d3.geo.mercator()
+      .scale(950)
+      .translate([width * 2.16, height * 1.5]);
+
+  var path = d3.geo.path().projection(projection);
+
+  svg.selectAll("path.state")
+    .data(topojson.feature(geometry, geometry.objects.usStates).features)
+    .enter()
+      .append("path")
+      .attr("d", path)
+      .classed("state", true);
+});
+```
+---
+
+# example code:
+
+See here:
+
+http://jsfiddle.net/iros/9omg1jh6/
+
+---
+
+# Projections
+
+A projection is a way to transform latitude (vertical) and longitude (horizontal) coordinates from a spherical surface (like earth) to a flat 2D plane.
+
+![projection](assets/projection_basic.png)
+
+[great book about projections](http://kartoweb.itc.nl/geometrics/Map%20projections/Understanding%20Map%20Projections.pdf)
+
+---
+
+# Projections in d3
+
+![projection table](assets/projection_list.png)
+
+https://github.com/mbostock/d3/wiki/Geo-Projections
+
+---
+
+# Projections in d3
+
+To create a new projection you call:
+
+```javascript
+var projection = d3.geo.stereographic();
+```
+
+The result is a function that can transform locations (lon,lat) to cartesian plane (x,y).
+It can also:
+
+* `invert(point)` - turn an x,y coordinate back to lon/lat.
+* `rotate(rotation)` - sets the rotation of the projection (useful in stereographic)
+* `center(location)` - sets the center of the projection.
+* `translate(point)` - indicates by how much the projection should translate the geometry (x, y)
+* `scale(point)` - indicates by how much the projection should scale the geometry in x and y.
+
+---
+
+# Geo Path Generator
+
+Once we have a projection, we can convert points from lon,lat to x,y but we still
+need to generate the path that will connect them. For that, we have `d3.geo.path`
+which can take any number of features and generate our path string.
+
+To display multiple features, you can place them in a single feature collection and a single path element:
+
+```javascript
+var path = d3.geo.path().projection(projection);
+svg.append("path")
+    .datum(topojson.feature(geometry, geometry.objects.usStates).features)
+    .attr("d", path);
+
+```
+
+Alternatively, you can create multiple distinct path elements:
+
+```javascript
+var path = d3.geo.path().projection(projection);
+svg.selectAll("path")
+    .data(topojson.feature(geometry, geometry.objects.usStates).features)
+  .enter().append("path")
+    .attr("d", path);
+```
+
+---
+
+# d3.geo functions
+
+The path has a few really useful functions that come bundled with it. Some of my favorites are:
+
+* `d3.geo.area(feature)` - returns the spherical area of a specific feature.
+* `d3.geo.bounds(feature)` - returns the bounding spherical box of a feature
+* `d3.geo.centroid(feature)` - calculates the center point of a feature, useful for basic labeling.
+
+---
+
+# Adding data
+
+We rendered a map and that's fine and all, but what do we do now? We need to render some actual data!
+
+First we need some data to match our states:
+
+```javascript
+var stats = {
+  "WA": {
+      "name": "Washington",
+      "land": 172348,
+      "water": 12318,
+      "water_to_land_ratio": 0.07147167359064219
+  } // ...
+}
+```
+
+We are going to use the two letter state code to match our geometry:
+
+```javascript
+{
+  "type": "Polygon",
+  "arcs": [[2, 3, 4]],
+  "properties": {
+    "STATE_ABBR": "WA"
+  }
+} // ...
+```
+
+---
+
+# Adding data
+
+Assume we have a color scale called `colorScale` whose domain is the extent of
+the water-to-land-ratio, and uses a blue linear scale to match.
+
+```javascript
+svg.selectAll("path")
+  .data(topojson.feature(us, us.objects.usStates).features)
+  .enter().append("path")
+  .attr('d', path)
+  .attr('class', 'state')
+    .style("fill", function(d) {
+      return colorScale(stats[d.properties.STATE_ABBR].water_to_land_ratio);
+    });
+```
+
+Code:
+
+http://jsfiddle.net/iros/00sthL82/
+
+---
+
+# Challenges with mapping in d3
+
+1. Path compexity - Getting geometry that is too complicated will result in really complex svg shapes which will slow things down. Getting geometry that is not complicated enough will remove geographic regions all together.
+
+2. Labeling - trying to position labels is hard!
+
+3. Finding geometry - If you're not visualizing a super high level map or a first world country, fidning the geometry can be challenging.
+
+---
+
+# Resources
+
+* [Maps](https://www.jasondavies.com/maps/), Jason Davies.
+* [Let's make a map](http://bost.ocks.org/mike/map/), Mike Bostock.
+* [D3.js Geo fun](http://hashbang.co.nz/blog/2013/2/25/d3_js_geo_fun), Graham Jenson.
+
+---
+
+class:middle,center
+
+# Questions?
+
+---
+
+class:middle,center
+# Code Time!
+## Exercise: Maps</textarea>
+  <script src="vendor/remark.min.js" type="text/javascript"></script>
+  <script type="text/javascript">
+    var slideshow = remark.create();
+  </script>
+  <script src="vendor/underscore.js" type="text/javascript"></script>
+  <script src="vendor/d3.js" type="text/javascript"></script>
+  
+</body>
+

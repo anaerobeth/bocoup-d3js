@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+
+  <title>Visualizing data with d3.js - SVG, Part 2 Tests</title>
+
+  <!-- QUnit styles -->
+  <link rel="stylesheet" href="../vendor/test/qunit.css">
+</head>
+
+<body>
+  <!-- QUnit stucture -->
+  <div class="dataset-test">
+    <h1 id="qunit-header">Challenge Test Suite</h1>
+    <h2 id="qunit-banner"></h2>
+    <h2 id="qunit-userAgent"></h2>
+    <ol id="qunit-tests"></ol>
+  </div>
+
+  <div id="container" style="display:none;">
+    <div id="visuals">
+    </div>
+  </div>
+
+  <!-- Testing libs -->
+  <script src="../vendor/test/qunit.js"></script>
+
+  <!-- Application libs -->
+  <script type="text/javascript" src="../vendor/d3.js"></script>
+  <script type="text/javascript" src="../vendor/topojson.js"></script>
+  <script type="text/javascript" src="../vendor/jquery.min.js"></script>
+  <script type="text/javascript" src="../vendor/underscore.js"></script>
+  <script type="text/javascript" src="../vendor/backbone.js"></script>
+
+  <script src="//localhost:35729/livereload.js"></script>
+  <script type="text/javascript" src="../assets/countrydata.js"></script>
+  <script type="text/javascript" src="../app/setup.js"></script>
+  <script type="text/javascript" src="../app/app.js"></script>
+
+
+  <!-- TESTS -->
+  <script type="text/javascript">
+
+// test 1
+test("Task 1: Define indicator variables ", function() {
+
+    ok(typeof xIndicator !== "undefined", "xIndicator should be defined");
+    ok(typeof yIndicator !== "undefined", "yIndicator should be defined");
+    ok(typeof rIndicator !== "undefined", "rIndicator should be defined");
+
+});
+
+test("Task 2: Define the x, y and radius scales", function() {
+
+    ok(typeof xScale !== "undefined", "xScale should be defined");
+    ok(_.isEqual(xScale.range(), [0,width]), "xScale range should be 0 - width");
+    ok(typeof yScale !== "undefined", "yScale should be defined");
+    ok(_.isEqual(yScale.range(), [height, 0]), "yScale range should be height - 0. Yes reverse!");
+    ok(typeof radiusScale !== "undefined", "radiusScale should be defined");
+    ok(_.isEqual(radiusScale.range(), [4, 40]), "radiusScale range should be 4-40");
+
+    console.log(xScale.domain(), yScale.domain(), radiusScale.domain());
+
+});
+
+test("Task 3: Define the domains for our scales correctly", function() {
+
+  var xDomain = [281.908596572129, 119849.293353937];
+  var yDomain = [19.5049268292683, 85.1634146341463];
+  var rDomain = [4279, 1350695000];
+
+    ok(_.isEqual(xScale.domain(), xDomain), "xScale domain should be " + JSON.stringify(xDomain));
+    ok(_.isEqual(yScale.domain(), yDomain), "yScale domain should be " + JSON.stringify(yDomain));
+    ok(_.isEqual(radiusScale.domain(), rDomain), "radiusScale domain should be " + JSON.stringify(rDomain));
+
+});
+
+test("Task 4: Extract valid nations", function() {
+
+    ok(validNations.length == 185, "There should be 185 valid nations. There are " + validNations.length);
+
+});
+
+test("Task 5: Position and size circles appropriatly", function() {
+
+    var circles = viewer.selectAll("circle.nation");
+    ok(circles.size() === 185, "There should be 185 circles. There are " + circles.size());
+
+});</script>
+</body>
+</html>

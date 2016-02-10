@@ -1,0 +1,13 @@
+circle.nation {
+  stroke-width: 1px;
+  stroke: black;
+}
+text {
+  font: 10px sans-serif;
+}
+
+.axis path, .axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
